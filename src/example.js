@@ -8,7 +8,7 @@ start.setFullYear(2012);
 
 var end = new Date();
 
-//instanciate the calculator
+//instantiate the calculator
 var c = new CronCalc();
 //call list dates to get a list of all dates that match the epxress between the dates
 console.log('out', c.listDates('* 1 1 1 ? 2013', start, end));
