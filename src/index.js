@@ -1,3 +1,10 @@
+/**
+ * CronCalc
+ * Written by: Kieran Yeates
+ * Date: 2013-12-14
+ *
+ * some common calculations for cron expressions
+ */
 module.exports = function()
 {
     var self = this;
