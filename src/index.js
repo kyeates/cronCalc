@@ -12,26 +12,9 @@ module.exports = function()
      */
     self.listDates = function(expression, start, end)
     {
-        var dates = [];
-
         var cron = new Cron(expression);
-
-        console.log('cron', cron);
-
-
-        return dates;
+        return self.findAllMatching(cron, start, end);
     };
-
-    self.listDates('1 1 1 1 ? 2013', new Date(), new Date());
-
-
-
-    var log = [];
-
-    functionconstruct()
-    {
-        //$this->log = Logger::getLogger('CronUtil');
-    }
 
     self.humanReadable = function(cron)
     {
@@ -46,154 +29,166 @@ module.exports = function()
      * @param end = unix timestamp to stop looking at
      * @returns {*}
      */
-    var findAllMatching = function(cron, start, end)
+    self.findAllMatching = function(cron, start, end)
     {
-        var result = array();
+        var result = [];
 
         //umm lets start one minute before start so we can include start?? right?
-        var found = self.findNext(cron, start - 60);
+        start.setMinutes(start.getMinutes() - 1);
+        var found = self.findNext(cron, start);
         var i = 0;
         //only run 1000 times. otherwise we might be here for ever
         while(found <= end && i++ < 1000)
         {
 
-            //$this->log->debug('------find Match in date range - start: ' . $this->timeToString(start) . '(' . start . ') end: ' . $this->timeToString(end) . '(' . end . ')');
+            //self.log->debug('------find Match in date range - start: ' . self.timeToString(start) . '(' . start . ') end: ' . self.timeToString(end) . '(' . end . ')');
 
             if (!found)
             {
-                //$this->log->debug("FOUND FALSE!!!!");
+                //self.log->debug("FOUND FALSE!!!!");
                 break;
             }
 
-            //$this->log->debug("found: (found)");
-            //$this->log->debug("find day of week match-  needle [" . date('w', found) . "] haystack: [" . var_export(cron->getDaysOfWeek(), true) . "]");
-            if (in_array(date('w', found), cron->getDaysOfWeek()))
+            //self.log->debug("found: (found)");
+            //self.log->debug("find day of week match-  needle [" . date('w', found) . "] haystack: [" . var_export(cron->getDaysOfWeek(), true) . "]");
+            if (cron.times.daysOfWeek.indexOf(found.getDay()))
             {
-                //$this->log->debug("found matches day [" . date('w', found) . "]");
+                //self.log->debug("found matches day [" . date('w', found) . "]");
                 result.push(found);
             }
 
-            found = $this->findNext(cron, found);
+            found = self.findNext(cron, found);
         }
 
         return result;
-    }
+    };
 
-    function findFirst(cron, start)
+    self.findFirst = function(cron, start)
     {
-        $minute = $this->findNextValueFromRange(cron->getMinutes(), date('i', start) - 1);
-        $hour = $this->findNextValueFromRange(cron->getHours(), date('H', start) - 1);
-        $dayOfMonth = $this->findNextValueFromRange(cron->getDaysOfMonth(), date('j', start) - 1);
-        $month = $this->findNextValueFromRange(cron->getMonths(), date('n', start) - 1);
-        $year = $this->findNextValueFromRange(cron->getYears(), date('Y', start) - 1);
+        minute = self.findNextValueFromRange(cron.times.minutes,start.getMinutes() - 1);
+        hour = self.findNextValueFromRange(cron.times.hours, start.getHours() - 1);
+        dayOfMonth = self.findNextValueFromRange(cron.times.daysOfMonth, start.getDate() - 1);
+        month = self.findNextValueFromRange(cron.times.months, start.getMonths() - 1);
+        year = self.findNextValueFromRange(cron.times.years, start.getFullYear() - 1);
 
 
-        return mktime($hour, $minute, 0, $month, $dayOfMonth, $year);
-    }
+        return self.mktime(hour, minute, 0, month, dayOfMonth, year);
+    };
 
-    function findNext(cron, start)
+    self.findNext = function(cron, start)
     {
         //find all parts of the current time;
-        $minute = date('i', start);
-        $minutes = cron->getMinutes();
-        $hour = date('H', start);
-        $hours = cron->getHours();
-        $dayOfMonth = date('j', start);
-        $daysOfMonth = cron->getDaysOfMonth();
-        $month = date('n', start);
-        $months = cron->getMonths();
-        $year = date('Y', start);
-        $years = cron->getYears();
+        var minute = start.getMinutes();
+        var minutes = cron.times.minutes;
+        var hour = start.getHours();
+        var hours = cron.times.hours;
+        var dayOfMonth = start.getDate();
+        var daysOfMonth = cron.times.daysOfMonth;
+        var month = start.getMonth() + 1;
+        var months = cron.times.months;
+        var year = start.getFullYear();
+        var years = cron.times.years;
 
+        //self.log->debug("find next =  year/month/dayOfMonth hour:minute (start)" );
 
-
-
-        //$this->log->debug("find next =  $year/$month/$dayOfMonth $hour:$minute (start)" );
-
-        $nextMinute = $this->findNextValueFromRange($minutes, $minute);
-        //$this->log->debug("next m: $nextMinute");
-        if (!$nextMinute)
+        var nextMinute = self.findNextValueFromRange(minutes, minute);
+        //self.log->debug("next m: nextMinute");
+        if (!nextMinute)
         {
-            $minute = $minutes[0];
-            $nextHour = $this->findNextValueFromRange($hours, $hour);
-            //$this->log->debug("next h: $nextHour");
-            if(!$nextHour)
+            minute = minutes[0];
+            var nextHour = self.findNextValueFromRange(hours, hour);
+            //self.log->debug("next h: nextHour");
+            if(!nextHour)
             {
-                $hour = $hours[0];
-                $nextDayOfMonth = $this->findNextValueFromRange($daysOfMonth,  $dayOfMonth);
-                //$this->log->debug("next d: $nextDayOfMonth");
-                if (!$nextDayOfMonth)
+                hour = hours[0];
+                var nextDayOfMonth = self.findNextValueFromRange(daysOfMonth,  dayOfMonth);
+                //self.log->debug("next d: nextDayOfMonth");
+                if (!nextDayOfMonth)
                 {
-                    $dayOfMonth = $daysOfMonth[0];
-                    $nextMonth = $this->findNextValueFromRange($months, $month);
-                    //$this->log->debug("next mo: $nextMonth");
-                    if (!$nextMonth)
+                    dayOfMonth = daysOfMonth[0];
+                    var nextMonth = self.findNextValueFromRange(months, month);
+                    //self.log->debug("next mo: nextMonth");
+                    if (!nextMonth)
                     {
-                        $month = $months[0];
-                        $nextYear = $this->findNextValueFromRange($years, $year);
-                        //$this->log->debug("next y: $nextYear");
-                        if (!$nextYear)
+                        month = months[0];
+                        var nextYear = self.findNextValueFromRange(years, year);
+                        //self.log->debug("next y: nextYear");
+                        if (!nextYear)
                         {
-                            //$this->log->debug('no next year found, THE END!!!');
+                            //self.log->debug('no next year found, THE END!!!');
                             return false;
                         }
                         else
                         {
-                            $year = $nextYear;
+                            year = nextYear;
                         }
                     }
                     else
                     {
-                        $month = $nextMonth;
+                        month = nextMonth;
                     }
                 }
                 else
                 {
-                    $dayOfMonth = $nextDayOfMonth;
+                    dayOfMonth = nextDayOfMonth;
                 }
             }
             else
             {
-                $hour = $nextHour;
+                hour = nextHour;
             }
         }
         else
         {
-            $minute = $nextMinute;
+            minute = nextMinute;
         }
 
-        $time = mktime($hour, $minute, 0, $month, $dayOfMonth, $year);
-        //$this->log->debug("found next =  $year/$month/$dayOfMonth $hour:$minute ($time)" );
-        return $time;
-    }
+        var time = self.mktime(hour, minute, 0, month, dayOfMonth, year);
+        //self.log->debug("found next =  year/month/dayOfMonth hour:minute (time)" );
+        return time;
+    };
 
-    function findNextValueFromRange($haystack, $needle)
+    self.findNextValueFromRange = function(haystack, needle)
     {
-        //$this->log->debug("find next value - needle: $needle haystack: " . sizeof($haystack) . " [" . implode(",", $haystack) . "]");
-        for ($i = 0; $i < sizeof($haystack); $i++)
+        //self.log->debug("find next value - needle: needle haystack: " . sizeof(haystack) . " [" . implode(",", haystack) . "]");
+        for (var i = 0; i < haystack.length; i++)
         {
-            if ($haystack[$i] > $needle)
+            if (haystack[i] > needle)
             {
-                //$this->log->debug("found next value: " . $haystack[$i]);
-                return $haystack[$i];
+                //self.log->debug("found next value: " . haystack[i]);
+                return haystack[i];
             }
         }
 
-        //$this->log->debug("NOT found");
+        //self.log->debug("NOT found");
         return false;
+    };
+
+    //used for logging which is not setup now
+//    self.timeToString = function(time)
+//    {
+//        var minute = date('i', time);
+//        var hour = date('H', time);
+//        var day = date('d', time);
+//        var month = date('m', time);
+//        var year = date('Y', time);
+//
+//    //        Logger::getLogger('CronUtil')->debug('timeToString timestamp: ' . time . ' year: ' . year . ' month: ' . month . ' day: ' . day . ' hour: ' . hour . ' minute: ' . minute);
+//
+//        return  year + '/' + month + '/' + day + ' ' + hour + ':' + minute;
+//    };
+
+    self.mktime = function(hour, minute, seconds, month, dayOfMonth, year)
+    {
+        var d = new Date();
+
+        d.setHours(hour);
+        d.setMinutes(minute);
+        d.setSeconds(seconds);
+        d.setMonth(month - 1);
+        d.setDate(dayOfMonth);
+        d.setFullYear(year);
+
+        return d;
     }
-
-    static function timeToString($time)
-{
-    $minute = date('i', $time);
-    $hour = date('H', $time);
-    $day = date('d', $time);
-    $month = date('m', $time);
-    $year = date('Y', $time);
-
-//        Logger::getLogger('CronUtil')->debug('timeToString timestamp: ' . $time . ' year: ' . $year . ' month: ' . $month . ' day: ' . $day . ' hour: ' . $hour . ' minute: ' . $minute);
-
-    return  $year . '/' . $month . '/' . $day . ' ' . $hour . ':' . $minute;
-}
-    
 };

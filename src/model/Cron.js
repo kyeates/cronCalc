@@ -148,7 +148,7 @@ module.exports = function(expression)
                     }
                     break;
 
-                //TODO some whay to handle week increments (eg: every second week) as it is not part of the cron spec
+                //TODO some what to handle week increments (eg: every second week) as it is not part of the cron spec
 //                case constants.WEEK_INCREMENT: //this mostly needs context to be evaluated, so handeld in CronUtils when we have a start/end date
 //                    result.push(parts[0]); //just get the specific day
 //                    break;
