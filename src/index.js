@@ -20,13 +20,18 @@ module.exports = function()
     self.listDates = function(expression, start, end)
     {
         var cron = new Cron(expression);
+        if (cron.errors.length > 0)
+        {
+            throw new Error(cron.errors);
+        }
+
         return self.findAllMatching(cron, start, end);
     };
 
     self.humanReadable = function(cron)
     {
         return "not implemented";
-    }
+    };
 
     /**
      * given a cron expression and a date range list all the dates that the cron will run in the range
@@ -72,6 +77,7 @@ module.exports = function()
 
     self.findFirst = function(cron, start)
     {
+        console.log('find first')
         minute = self.findNextValueFromRange(cron.times.minutes,start.getMinutes() - 1);
         hour = self.findNextValueFromRange(cron.times.hours, start.getHours() - 1);
         dayOfMonth = self.findNextValueFromRange(cron.times.daysOfMonth, start.getDate() - 1);
@@ -157,7 +163,8 @@ module.exports = function()
 
     self.findNextValueFromRange = function(haystack, needle)
     {
-        //self.log->debug("find next value - needle: needle haystack: " . sizeof(haystack) . " [" . implode(",", haystack) . "]");
+        //console.log('find next value from range: ', haystack);
+
         for (var i = 0; i < haystack.length; i++)
         {
             if (haystack[i] > needle)

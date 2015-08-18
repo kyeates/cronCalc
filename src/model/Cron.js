@@ -141,7 +141,7 @@ module.exports = function(expression)
                     }
                     break;
                 case constants.INCREMENT:
-                    console.log('get value from exp: increment found - start: ' . parts[0] + ' - max: '  + details.max);
+                    console.log('get value from exp: increment found - start: ' + parts[0] + ' - max: '  + details.max);
                     for(var i = parts[0]; i < details['max']; i+=parts[1])
                     {
                         result.push(i);
