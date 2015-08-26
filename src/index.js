@@ -9,6 +9,7 @@ module.exports = function()
 {
     var self = this;
     var Cron = require('./model/Cron');
+    self.defaultLimit = 1000;
 
     /**
      * given a cron expression and a date range list all the dates that the cron will run in the range
@@ -17,15 +18,20 @@ module.exports = function()
      * @param start
      * @param end
      */
-    self.listDates = function(expression, start, end)
+    self.listDates = function(expression, start, end, limit)
     {
+        if (!limit)
+        {
+            limit = self.defaultLimit;
+        }
+
         var cron = new Cron(expression);
         if (cron.errors.length > 0)
         {
             throw new Error(cron.errors);
         }
 
-        return self.findAllMatching(cron, start, end);
+        return self.findAllMatching(cron, start, end, limit);
     };
 
     self.humanReadable = function(cron)
@@ -35,14 +41,16 @@ module.exports = function()
 
     /**
      * given a cron expression and a date range list all the dates that the cron will run in the range
-     * 
+     *
      * @param cron = cron object
      * @param start = unix time stamp to start looking at
      * @param end = unix timestamp to stop looking at
      * @returns {*}
+     * @param limit
      */
-    self.findAllMatching = function(cron, start, end)
+    self.findAllMatching = function(cron, start, end, limit)
     {
+        if (!limit) limit = self.defaultLimit;
         var result = [];
 
         //umm lets start one minute before start so we can include start?? right?
@@ -50,7 +58,7 @@ module.exports = function()
         var found = self.findNext(cron, start);
         var i = 0;
         //only run 1000 times. otherwise we might be here for ever
-        while(found <= end && i++ < 1000)
+        while(found <= end && i++ < limit)
         {
 
             //self.log->debug('------find Match in date range - start: ' . self.timeToString(start) . '(' . start . ') end: ' . self.timeToString(end) . '(' . end . ')');
