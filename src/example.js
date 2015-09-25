@@ -11,4 +11,5 @@ var end = new Date();
 //instantiate the calculator
 var c = new CronCalc();
 //call list dates to get a list of all dates that match the epxress between the dates
-console.log('out', c.listDates('* 1 1 1 ? 2013', start, end));
+var dates  = c.listDates('*/2 * * * *', start, end, 120);
+console.log('out', dates);

@@ -92,6 +92,15 @@ module.exports = function(expression)
         return exp;
     }
 
+    /**
+     * Find all the values that will match for a Cron expression
+     *
+     * Parse the special characters (*,/?) and convert them to the matching numbers
+     *
+     * @param expression
+     * @param details
+     * @returns {*}
+     */
     var getValuesFromExpression = function(expression, details)
     {
         var result = [];
@@ -123,6 +132,12 @@ module.exports = function(expression)
             {
                 case constants.ALL:
                 case constants.ANY:
+                    //make sure that we are not also using the increment character as well, which takes precidentce
+                    if (expression.indexOf(constants.INCREMENT) >= 0)
+                    {
+                        break;
+                    }
+
                     for(var i = details.min; i <= details.max; i++)
                     {
                         result.push(i);
@@ -141,17 +156,19 @@ module.exports = function(expression)
                     }
                     break;
                 case constants.INCREMENT:
-                    console.log('get value from exp: increment found - start: ' + parts[0] + ' - max: '  + details.max);
-                    for(var i = parts[0]; i < details['max']; i+=parts[1])
+                    console.log('get value from exp: increment found - start: ' + parts[0] + ' - max: '  + details.max + ' - parts1: ' + parts[1]);
+                    var start = parts[0];
+                    var increment = parseInt(parts[1]);
+                    if (start === constants.ALL)
+                    {
+                        start = 0;
+                    }
+
+                    for(var i = start; i < details['max']; i+=increment)
                     {
                         result.push(i);
                     }
                     break;
-
-                //TODO some what to handle week increments (eg: every second week) as it is not part of the cron spec
-//                case constants.WEEK_INCREMENT: //this mostly needs context to be evaluated, so handeld in CronUtils when we have a start/end date
-//                    result.push(parts[0]); //just get the specific day
-//                    break;
             }
 
             if (result.length > 0)
