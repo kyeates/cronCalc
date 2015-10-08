@@ -36,12 +36,12 @@ module.exports = function(expression)
         if (!valid)
             return false;
 
-       self.times.minutes = getValuesFromExpression(self.explodedExpression.minute, constants.validCron.minute);
-       self.times.hours = getValuesFromExpression(self.explodedExpression.hour, constants.validCron.hour);
-       self.times.daysOfMonth = getValuesFromExpression(self.explodedExpression.dayOfMonth, constants.validCron.dayOfMonth);
-       self.times.months = getValuesFromExpression(self.explodedExpression.month, constants.validCron.month);
-       self.times.daysOfWeek = getValuesFromExpression(self.explodedExpression.dayOfWeek, constants.validCron.dayOfWeek);
-       self.times.years = getValuesFromExpression(self.explodedExpression.year, constants.validCron.year);
+       self.times.minutes = self.getValuesFromExpression(self.explodedExpression.minute, constants.validCron.minute);
+       self.times.hours = self.getValuesFromExpression(self.explodedExpression.hour, constants.validCron.hour);
+       self.times.daysOfMonth = self.getValuesFromExpression(self.explodedExpression.dayOfMonth, constants.validCron.dayOfMonth);
+       self.times.months = self.getValuesFromExpression(self.explodedExpression.month, constants.validCron.month);
+       self.times.daysOfWeek = self.getValuesFromExpression(self.explodedExpression.dayOfWeek, constants.validCron.dayOfWeek);
+       self.times.years = self.getValuesFromExpression(self.explodedExpression.year, constants.validCron.year);
         
         return true;
     };
@@ -90,7 +90,7 @@ module.exports = function(expression)
     {    
         //TO BE IMPLEMENTED
         return exp;
-    }
+    };
 
     /**
      * Find all the values that will match for a Cron expression
@@ -101,7 +101,7 @@ module.exports = function(expression)
      * @param details
      * @returns {*}
      */
-    var getValuesFromExpression = function(expression, details)
+    self.getValuesFromExpression = function(expression, details)
     {
         var result = [];
 
@@ -146,7 +146,7 @@ module.exports = function(expression)
                 case constants.SEPERATOR:
                     for(var partId in parts)
                     {
-                        result = result.concat(getValuesFromExpression(parts[partId], details));
+                        result = result.concat(self.getValuesFromExpression(parts[partId], details));
                     }
                     break;
                 case constants.RANGE:

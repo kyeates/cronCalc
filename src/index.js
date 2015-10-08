@@ -9,6 +9,8 @@ module.exports = function()
 {
     var self = this;
     var Cron = require('./model/Cron');
+    var CronConst = require('./model/CronConst');
+    var constants = new CronConst();
     self.defaultLimit = 1000;
 
     /**
@@ -32,6 +34,43 @@ module.exports = function()
         }
 
         return self.findAllMatching(cron, start, end, limit);
+    };
+
+    /**
+     * Given a time find X number of times the cron will run before that time.
+     *
+     * @param expression
+     * @param time
+     * @param limit
+     */
+    self.findByNumberBefore = function(expression, time, limit) {
+        if (!limit)
+        {
+            limit = self.defaultLimit;
+        }
+
+        var cron = new Cron(expression);
+        if (cron.errors.length > 0)
+        {
+            throw new Error(cron.errors);
+        }
+
+        return self.findBefore(cron, time, limit);
+    };
+
+    self.findByNumberAfter =  function(expression, time, limit) {
+        if (!limit)
+        {
+            limit = self.defaultLimit;
+        }
+
+        var cron  = new Cron(expression);
+        if (cron.errors.length > 0)
+        {
+            throw new Error(cron.errors);
+        }
+
+        return self.findAfter(cron, time, limit);
     };
 
     self.humanReadable = function(cron)
@@ -61,19 +100,39 @@ module.exports = function()
         while(found <= end && i++ < limit)
         {
 
-            //self.log->debug('------find Match in date range - start: ' . self.timeToString(start) . '(' . start . ') end: ' . self.timeToString(end) . '(' . end . ')');
-
             if (!found)
             {
-                //self.log->debug("FOUND FALSE!!!!");
                 break;
             }
 
-            //self.log->debug("found: (found)");
-            //self.log->debug("find day of week match-  needle [" . date('w', found) . "] haystack: [" . var_export(cron->getDaysOfWeek(), true) . "]");
             if (cron.times.daysOfWeek.indexOf(found.getDay()))
             {
-                //self.log->debug("found matches day [" . date('w', found) . "]");
+                result.push(found);
+            }
+
+            found = self.findNext(cron, found);
+        }
+
+        return result;
+    };
+
+    self.findAfter = function(cron, time, limit)
+    {
+        if (!limit) limit = self.defaultLimit;
+        var result = [];
+
+        //start one minute before so we can inlucde start
+        time.setMinutes(time.getMinutes() + 1);
+        var found = self.findNext(cron, time);
+        for(var i = 0;i < limit; i++)
+        {
+            if (!found)
+            {
+                break;
+            }
+
+            if (cron.times.daysOfWeek.indexOf(found.getDay()))
+            {
                 result.push(found);
             }
 
@@ -85,7 +144,6 @@ module.exports = function()
 
     self.findFirst = function(cron, start)
     {
-        console.log('find first')
         minute = self.findNextValueFromRange(cron.times.minutes,start.getMinutes() - 1);
         hour = self.findNextValueFromRange(cron.times.hours, start.getHours() - 1);
         dayOfMonth = self.findNextValueFromRange(cron.times.daysOfMonth, start.getDate() - 1);
@@ -110,33 +168,29 @@ module.exports = function()
         var year = start.getFullYear();
         var years = cron.times.years;
 
-        //self.log->debug("find next =  year/month/dayOfMonth hour:minute (start)" );
-
         var nextMinute = self.findNextValueFromRange(minutes, minute);
-        //self.log->debug("next m: nextMinute");
         if (!nextMinute)
         {
             minute = minutes[0];
             var nextHour = self.findNextValueFromRange(hours, hour);
-            //self.log->debug("next h: nextHour");
             if(!nextHour)
             {
                 hour = hours[0];
+                var validDayOfMonth = constants.validCron.dayOfMonth;
+                validDayOfMonth.max = new Date(year, month -1, 0).getDate();
+                daysOfMonth  = cron.getValuesFromExpression(cron.explodedExpression.dayOfMonth, validDayOfMonth);
+
                 var nextDayOfMonth = self.findNextValueFromRange(daysOfMonth,  dayOfMonth);
-                //self.log->debug("next d: nextDayOfMonth");
                 if (!nextDayOfMonth)
                 {
                     dayOfMonth = daysOfMonth[0];
                     var nextMonth = self.findNextValueFromRange(months, month);
-                    //self.log->debug("next mo: nextMonth");
                     if (!nextMonth)
                     {
                         month = months[0];
                         var nextYear = self.findNextValueFromRange(years, year);
-                        //self.log->debug("next y: nextYear");
                         if (!nextYear)
                         {
-                            //self.log->debug('no next year found, THE END!!!');
                             return false;
                         }
                         else
@@ -165,40 +219,134 @@ module.exports = function()
         }
 
         var time = self.mktime(hour, minute, 0, month, dayOfMonth, year);
-        //self.log->debug("found next =  year/month/dayOfMonth hour:minute (time)" );
         return time;
     };
 
     self.findNextValueFromRange = function(haystack, needle)
     {
-        //console.log('find next value from range: ', haystack);
-
         for (var i = 0; i < haystack.length; i++)
         {
             if (haystack[i] > needle)
             {
-                //self.log->debug("found next value: " . haystack[i]);
                 return haystack[i];
             }
         }
 
-        //self.log->debug("NOT found");
         return false;
     };
 
-    //used for logging which is not setup now
-//    self.timeToString = function(time)
-//    {
-//        var minute = date('i', time);
-//        var hour = date('H', time);
-//        var day = date('d', time);
-//        var month = date('m', time);
-//        var year = date('Y', time);
-//
-//    //        Logger::getLogger('CronUtil')->debug('timeToString timestamp: ' . time . ' year: ' . year . ' month: ' . month . ' day: ' . day . ' hour: ' . hour . ' minute: ' . minute);
-//
-//        return  year + '/' + month + '/' + day + ' ' + hour + ':' + minute;
-//    };
+    self.findPrevValueFromRange = function(haystack, needle)
+    {
+        for (var i = haystack.length - 1; i >= 0; i--)
+        {
+            if (haystack[i] < needle)
+            {
+                return haystack[i];
+            }
+        }
+        return false;
+    };
+
+    /**
+     * Find x number of cron before this time.
+     * @param cron
+     * @param time
+     * @param limit
+     */
+    self.findBefore = function(cron, time, limit)
+    {
+        if (!limit) limit = self.defaultLimit;
+        var result = [];
+
+        //start one minute before so we can inlucde start
+        time.setMinutes(time.getMinutes() + 1);
+        var found = self.findPrev(cron, time);
+        for(var i = 0;i < limit; i++)
+        {
+            if (!found)
+            {
+                break;
+            }
+
+            if (cron.times.daysOfWeek.indexOf(found.getDay()))
+            {
+                result.push(found);
+            }
+
+            found = self.findPrev(cron, found);
+        }
+
+        return result;
+    };
+
+    self.findPrev = function(cron, start)
+    {
+        //find all parts of the current time;
+        var minute = start.getMinutes();
+        var minutes = cron.times.minutes;
+        var hour = start.getHours();
+        var hours = cron.times.hours;
+        var dayOfMonth = start.getDate();
+        var daysOfMonth = cron.times.daysOfMonth;
+        var month = start.getMonth() + 1;
+        var months = cron.times.months;
+        var year = start.getFullYear();
+        var years = cron.times.years;
+
+        var prevMinute = self.findPrevValueFromRange(minutes, minute);
+        if (!prevMinute)
+        {
+            minute = minutes[minutes.length - 1];
+            var prevHour = self.findPrevValueFromRange(hours, hour);
+            if(!prevHour)
+            {
+                hour = hours[hours.length - 1];
+                var validDayOfMonth = constants.validCron.dayOfMonth;
+                validDayOfMonth.max = new Date(year, month -1, 0).getDate();
+                daysOfMonth  = cron.getValuesFromExpression(cron.explodedExpression.dayOfMonth, validDayOfMonth);
+
+                var prevDayOfMonth = self.findPrevValueFromRange(daysOfMonth,  dayOfMonth);
+                if (!prevDayOfMonth)
+                {
+                    dayOfMonth = daysOfMonth[daysOfMonth.length - 1];
+                    var prevMonth = self.findPrevValueFromRange(months, month);
+                    if (!prevMonth)
+                    {
+                        month = months[months.length - 1];
+                        var prevYear = self.findPrevValueFromRange(years, year);
+                        if (!prevYear)
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            year = prevYear;
+                        }
+                    }
+                    else
+                    {
+                        month = prevMonth;
+                    }
+                }
+                else
+                {
+                    dayOfMonth = prevDayOfMonth;
+                }
+            }
+            else
+            {
+                hour = prevHour;
+            }
+        }
+        else
+        {
+            minute = prevMinute;
+        }
+
+        var time = self.mktime(hour, minute, 0, month, dayOfMonth, year);
+        //self.log->debug("found next =  year/month/dayOfMonth hour:minute (time)" );
+        return time;
+    };
 
     self.mktime = function(hour, minute, seconds, month, dayOfMonth, year)
     {
@@ -212,5 +360,5 @@ module.exports = function()
         d.setFullYear(year);
 
         return d;
-    }
+    };
 };
