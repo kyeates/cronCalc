@@ -1,6 +1,6 @@
 {
   "name": "cron-calc",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A Utility to list all the times a cron expression is expected to trigger within a date range",
   "main": "src/index.js",
   "scripts": {
@@ -21,8 +21,5 @@
   "bugs": {
     "url": "https://github.com/kyeates/cronCalc/issues"
   },
-  "homepage": "https://github.com/kyeates/cronCalc",
-  "dependencies": {
-    "moment": "^2.10.6"
-  }
+  "homepage": "https://github.com/kyeates/cronCalc"
 }
