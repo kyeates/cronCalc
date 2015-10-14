@@ -33,7 +33,24 @@ module.exports = function()
             throw new Error(cron.errors);
         }
 
+        start.setSeconds(0);
+        end.setSeconds(0);
+
         return self.findAllMatching(cron, start, end, limit);
+    };
+
+    self.findByNumber = function(expression, time, beforeLimit, afterLimit) {
+        console.log(time);
+        var before = self.findByNumberBefore(expression, time, beforeLimit);
+        var after = self.findByNumberAfter(expression, time, afterLimit);
+
+        //if (before[before.length -  1].toUTCString() === after[0].toUTCString())
+        //{
+        //    before.pop();
+        //}
+        after = ['aaaaa'].concat(after);
+
+        return before.concat(after);
     };
 
     /**
@@ -49,13 +66,14 @@ module.exports = function()
             limit = self.defaultLimit;
         }
 
+        time.setSeconds(0);
         var cron = new Cron(expression);
         if (cron.errors.length > 0)
         {
             throw new Error(cron.errors);
         }
 
-        return self.findBefore(cron, time, limit);
+        return self.findBefore(cron, time, limit).reverse();
     };
 
     self.findByNumberAfter =  function(expression, time, limit) {
@@ -64,6 +82,7 @@ module.exports = function()
             limit = self.defaultLimit;
         }
 
+        time.setSeconds(0);
         var cron  = new Cron(expression);
         if (cron.errors.length > 0)
         {
@@ -122,8 +141,9 @@ module.exports = function()
         var result = [];
 
         //start one minute before so we can inlucde start
-        time.setMinutes(time.getMinutes() + 1);
+        time.setMinutes(time.getMinutes() -1);
         var found = self.findNext(cron, time);
+        console.log('after first:', found);
         for(var i = 0;i < limit; i++)
         {
             if (!found)
@@ -258,9 +278,10 @@ module.exports = function()
         if (!limit) limit = self.defaultLimit;
         var result = [];
 
-        //start one minute before so we can inlucde start
+        //start one minute after so we can inlucde start
         time.setMinutes(time.getMinutes() + 1);
         var found = self.findPrev(cron, time);
+        console.log('before first:', found);
         for(var i = 0;i < limit; i++)
         {
             if (!found)
@@ -301,7 +322,7 @@ module.exports = function()
             if(!prevHour)
             {
                 hour = hours[hours.length - 1];
-                var validDayOfMonth = constants.validCron.dayOfMonth;
+                var validDayOfMonthno = constants.validCron.dayOfMonth;
                 validDayOfMonth.max = new Date(year, month -1, 0).getDate();
                 daysOfMonth  = cron.getValuesFromExpression(cron.explodedExpression.dayOfMonth, validDayOfMonth);
 
@@ -358,6 +379,7 @@ module.exports = function()
         d.setMonth(month - 1);
         d.setDate(dayOfMonth);
         d.setFullYear(year);
+        d.setMilliseconds(0);
 
         return d;
     };

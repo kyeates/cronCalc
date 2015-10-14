@@ -13,5 +13,5 @@ var c = new CronCalc();
 //call list dates to get a list of all dates that match the epxress between the dates
 //var dates  = c.listDates('*/2 * * * *', start, end, 120);
 
-var dates  = c.findByNumberAfter('2 1 * * * 2015', new Date(), 100);
+var dates  = c.findByNumber('1 2 * * *', new Date(), 5,5);
 console.log('out', dates);
