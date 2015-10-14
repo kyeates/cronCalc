@@ -40,7 +40,6 @@ module.exports = function()
     };
 
     self.findByNumber = function(expression, time, beforeLimit, afterLimit) {
-        console.log(time);
         var before = self.findByNumberBefore(expression, time, beforeLimit);
         var after = self.findByNumberAfter(expression, time, afterLimit);
 
@@ -48,8 +47,6 @@ module.exports = function()
         //{
         //    before.pop();
         //}
-        after = ['aaaaa'].concat(after);
-
         return before.concat(after);
     };
 
@@ -61,12 +58,6 @@ module.exports = function()
      * @param limit
      */
     self.findByNumberBefore = function(expression, time, limit) {
-        if (!limit)
-        {
-            limit = self.defaultLimit;
-        }
-
-        time.setSeconds(0);
         var cron = new Cron(expression);
         if (cron.errors.length > 0)
         {
@@ -77,12 +68,6 @@ module.exports = function()
     };
 
     self.findByNumberAfter =  function(expression, time, limit) {
-        if (!limit)
-        {
-            limit = self.defaultLimit;
-        }
-
-        time.setSeconds(0);
         var cron  = new Cron(expression);
         if (cron.errors.length > 0)
         {
@@ -137,8 +122,15 @@ module.exports = function()
 
     self.findAfter = function(cron, time, limit)
     {
-        if (!limit) limit = self.defaultLimit;
+        if (!limit)
+        {
+            limit = self.defaultLimit;
+        }
+
         var result = [];
+
+        time = new Date(time);
+        time.setSeconds(0);
 
         //start one minute before so we can inlucde start
         time.setMinutes(time.getMinutes() -1);
@@ -275,8 +267,14 @@ module.exports = function()
      */
     self.findBefore = function(cron, time, limit)
     {
-        if (!limit) limit = self.defaultLimit;
+        if (!limit)
+        {
+            limit = self.defaultLimit;
+        }
         var result = [];
+
+        time = new Date(time);
+        time.setSeconds(0);
 
         //start one minute after so we can inlucde start
         time.setMinutes(time.getMinutes() + 1);
