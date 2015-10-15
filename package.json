@@ -1,6 +1,6 @@
 {
   "name": "cron-calc",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A Utility to list all the times a cron expression is expected to trigger within a date range",
   "main": "src/index.js",
   "scripts": {
