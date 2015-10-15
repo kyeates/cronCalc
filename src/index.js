@@ -96,8 +96,6 @@ module.exports = function()
         if (!limit) limit = self.defaultLimit;
         var result = [];
 
-        //umm lets start one minute before start so we can include start?? right?
-        start.setMinutes(start.getMinutes() - 1);
         var found = self.findNext(cron, start);
         var i = 0;
         //only run 1000 times. otherwise we might be here for ever
