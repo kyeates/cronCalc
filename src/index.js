@@ -130,8 +130,6 @@ module.exports = function()
         time = new Date(time);
         time.setSeconds(0);
 
-        //start one minute before so we can inlucde start
-        time.setMinutes(time.getMinutes() -1);
         var found = self.findNext(cron, time);
         console.log('after first:', found);
         for(var i = 0;i < limit; i++)
