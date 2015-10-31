@@ -77,6 +77,10 @@ module.exports = function()
         return self.findAfter(cron, time, limit);
     };
 
+    self.createCron = function(expression) {
+        return new Cron(expression);
+    };
+
     self.humanReadable = function(cron)
     {
         return "not implemented";
