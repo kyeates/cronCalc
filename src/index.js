@@ -320,7 +320,7 @@ module.exports = function()
             if(!prevHour)
             {
                 hour = hours[hours.length - 1];
-                var validDayOfMonthno = constants.validCron.dayOfMonth;
+                var validDayOfMonth = constants.validCron.dayOfMonth;
                 validDayOfMonth.max = new Date(year, month -1, 0).getDate();
                 daysOfMonth  = cron.getValuesFromExpression(cron.explodedExpression.dayOfMonth, validDayOfMonth);
 
