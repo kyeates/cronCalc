@@ -159,7 +159,7 @@ module.exports = function()
         minute = self.findNextValueFromRange(cron.times.minutes,start.getMinutes() - 1);
         hour = self.findNextValueFromRange(cron.times.hours, start.getHours() - 1);
         dayOfMonth = self.findNextValueFromRange(cron.times.daysOfMonth, start.getDate() - 1);
-        month = self.findNextValueFromRange(cron.times.months, start.getMonths() - 1);
+        month = self.findNextValueFromRange(cron.times.months, start.getMonth() - 1);
         year = self.findNextValueFromRange(cron.times.years, start.getFullYear() - 1);
 
 
